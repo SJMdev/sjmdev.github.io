@@ -1,0 +1,65 @@
+
+# Thesis
+!!! note
+    The following is a list of items that I learned from writing my thesis in c++17 on ubuntu 16.04.
+## programming notes
+
+
+### deleting items from the current vector
+Asteroids can be hit by bullets. If this is the case, they should be destroyed. We implemented the following logic:
+~~~~~~~~~~~~~~ C
+for (auto &asteroid: d_asteroids)
+{
+    for(auto &bullet: d_bullets)
+    {
+        if (asteroid.contains(bullet.hitbox()))
+        {
+            asteroid.erase();
+            bullet.erase();
+        }
+    }
+}
+~~~~~~~~~~~~~~
+The astute reader will note that something is going wrong here: what happens if you erase the asteroid that you are currently iterating over? **The program crashes***.
+so it did. we fixed this by marking asteroids and bullets for destruction, and destroying them later when not iterating over them (I think. I need to look this up).
+
+### Testing multiple algorithms: "case" in point
+We wanted to use different learning algorithms. However, these learning algorithms required different network architectures. These algorithms were mostly similar in structure and data flow,
+thus we implemented `case` switches for these algorithms and provided the constructor of the `Network`instance with a parameter describing which algorithm we were currently using.
+
+Unfortunately, as it always does, the core logic of these algorithms diverges pretty fast. It ended up with us writing a whole lot of state management and case logic in each function of the `Network` class,
+which in turn lead to less clarity (and a lot of mistakes).
+
+Had we used some form of inheritance for the Network class, It would have made it much easier to figure out where or what went wrong. It would allow us to use the core of the class for each algorithm (saving the network, exploration, etc.)
+but instantiate different Network-type classes, each with their own behavior.
+
+It would perhaps have also made it easier to add benchmarking, as we could just instantiate a benchmarking `Network`.
+
+### Using pointers in c++
+c++ has references: these are aliases for existing variables. Once a reference is initialized to a certain variable, it cannot be changed. It can also not be NULL.
+In general, it seems very wise to use references to use references as function arguments: it avoids a local copy in the function, is immutable (so we know what object we're talking about)
+and allows for code clarity in function definitions (as references do not need to be dereferenced like pointers).
+
+All of these points make it seem that pointers are mostly obsolete in c++. I would argue that this is mostly true, but I want to talk about a problem Niels and I ran in to during development.
+
+Imagine having a `Window` class. All it does is create a window for the user to look at the program. We used the `SFML` library to extract some of the complicated logic away. On our local machines,
+this worked perfectly fine. Subsequently, we then decided we should also be able to run the application without the window, as it would probably reduce computational load (and having a lot of windows open does not lead to higher usability of the machine).
+In our implementation, we still created the window, but never called the `window.show()` member function. This was the exact problem.
+
+When we tried to launch our application on peregrine, we were met by an X11 error. We concluded that the necessary drivers to launch a window (managed by SFML -> OpenGL -> system calls) were not installed. Not that weird, seeing as how peregrine is just a computing cluster,
+and has no need for these drivers. However, we had no idea how to install them, and even if we knew how, we probably weren't allowed to do so (peregrine is a large cluster used by many people).  However, we still needed a `Window` instance, as it also
+contained the game loop and state logic of the game. So how do we instantiate the `Window` Class without actually launching a window?
+
+To solve this problem, we used the following (and in hindsight, extremely obvious) solution: instantiate the `Window` class with a window pointer, and either set the pointer to a window or leave it NULL.
+
+### the singleton class pattern
+We wanted to change certain parameters of our project between runs (e.g. the network architecture, or the bullet and ship speed, that sort of thing). However, because we decided to write our project in c++,
+we had to recompile on every change. This quickly became unfeasible after compiling took more than 10 minutes (which is something we fixed later as well!). 
+
+From practical experience with video game tinkering, I had seen many .cfg files up until this point. We realized that if we had a config file for all these parameters, we could just feed all the parameters at runtime,
+and change them at our own leisure. However, we ran into implementation problems relatively quickly. We had many instances of several classes, mostly nested calls. We could instantiate a `Constants` object in every class,
+but that also seemed not the correct approachc. How do we make something globally accessible in nested functions and classes?
+
+We used the `extern Constants constants` approach. It is a janky solution compared to the singleton class pattern, but it worked for us.
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>

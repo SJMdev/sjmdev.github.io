@@ -1,0 +1,61 @@
+## Developing an ECS 
+
+### The World
+
+!!! note
+    Why not just use a vector of entities?
+We want data locality in order to prevent cache misses. However, what I am currently unsure about is whether we want similar entities (i.e. entities with shared components) close to each other, or an array of components, where each entity only has a pointer to the component.
+
+
+### Entities 
+the gist of the ECS is that an Entity is dumb. It has an ID by which it is referred. it also has components. I am currently envisioning it as a vector of type `Component` (more like a set of components). users can specify a `System` for some types of components. i.e. if there is a component `Health`, it allows us to create a `System` (a function) that updates the health, or knows what do to if the component is there for an entity.
+
+
+## Particle effects 
+I have always been enamored with particle effects in games, especially when well done. The bomb cloud from the wind waker is one of my favorite effects of all time.
+You can see the effect recreated [here](https://www.youtube.com/watch?v=0IrCggoJCno). In the coming weeks, I will be trying to recreate the effects myself according to this guide (which seems like a proper introduction to the subject).
+Furthermore, I want to create some sort of `Window` where I can play the particle effect.  
+
+Steps already taken:
+1. Installing blender
+2. Create a plane which emits particles!
+
+The result can be seen in in the following figure: 
+
+![Figure [particle1]: A gif showing particles being emitted from a plane](gifs/particlesystem.gif)
+
+
+
+
+TODO:
+3. Change the particles to something else.
+4. Try to figure out whether the files can be exported.
+
+## Lua Scripting
+Similar to the configuration problems we faced in the bachelor thesis, I was always interested in the drag'n'drop programming interfaces like in unity or the unreal engine. In these engines, the developer can write some script (e.g. for movement)
+and this script is then in some way converted to actual code? It seemed like magic to me. I vaguely knew of the term JIT compilation, but never really knew what that meant. I dabbled with lua scripting in the source engine for Dota 2 (specifically trying to recreate
+my favorite Heroes of Newerth Hero, Chipper). I recently saw a blog about creating and using lua bindings in c++ (click [here](https://eliasdaler.wordpress.com/2013/10/11/lua_cpp_binder/). Additionally, [this](https://eliasdaler.wordpress.com/2015/08/10/using-lua-and-cpp-in-practice/) blog contains some real world
+examples of using lua in c++.
+
+### installing the lua libraries on windows.
+There is a simple executable installer which you can grab off any search engine. This installs all the libraries and include folders etc.
+
+setting up a visual studio project that can use lua takes a bit. In essence, you need to include this at the top of your file:
+
+~~~~~~~~~~~~~~~~~~ C
+extern "C" {
+    # include "lua.h"
+    # include "lauxlib.h"
+    # include "lualib.h"
+    }
+~~~~~~~~~~~~~~~~
+Because  all the lua libraries are written in C.
+
+Furthermore, in the project's settings, you need to 
+1. Include the lua libraries themselves (by adding them to the "include" directories)
+2. Include the lua DLLs (by adding them to the "linker libraries")
+3. Adding "lua.5.1.lib" to the included libraries 
+
+Now, it sort of works. Additionally, I now sort of understand how useful template metaprogramming is: It allows you to dynamically create datatypes that we read in from the lua file.
+
+next step is creating dynamic functions.
