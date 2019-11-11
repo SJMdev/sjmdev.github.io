@@ -25,21 +25,8 @@ the idea of Procedural programming being usurped by OOP as the definitive better
 
  I think a solution would be to have the `dot()` function live in the namespace of `Vec3f`. I read somewhere (in a discussion of `class vs. struct`) that said __a class if it has hidden state, otherwise a struct__, which I believe to be the most sensible standpoint I have read so far. By the time I finished the c++ course, I had forgotten about structs. Now, I try to use them more. The quote from the discussion is similar to the idea that a struct should only contain POD (Plain Ol' Data). However, this lead me to believe that any object that requires functionality or change should be a class, which is definitely not true either.
 
-## Triple A c++ (Almost Always Auto)
-
-`auto` is very useful for iterators, as it allows us to just use list iteration syntax, preventing the user from over / underflowing. However, some people strive towards the Almost Always Auto convention, as necessarily, every variable needs to be initialized. Sometimes the user does not care for the type (which is also the case for iterators).
-~~~~~~~~~~
-auto x = int{3}; // designating the type of literals
-auto car = Car{a,b,c,}; // explicit constructor invocation
-for (auto &car: cars){} // iterate by reference over every car.
-auto x = make_unique<Car>; // useful for heap allocation?
-~~~~~~~~~~
-
-The convention That I got acquainted to now is to use it in places where a constructor call is necessary. The use of auto in these cases forces us to specify a specific constructor. Furthermore, using auto for iteration allows for smarter loop unrolling by the compiler. Finally, I use auto for reference types where I don't necessarily care for the type (e.g. a reference to a map of string and a particular type).
-
-In cases where an object can be trivially constructed, I use zero initialization.
-
 ## Defer vs Destruction
+
 The use of the `defer` keyword in languages such as Go intrigues me. While memory cleanup is still left in hands of the user (we still need to manually free allocated data), we can now place the free statement close the `malloc` equivalent statement. In the simplest case, that's interesting to force if we know an object needs to be terminated in the same scope. The question I can't properly answer is why this is better than RAII. RAII is the enforcement of ownership on the object itself, while the defer lets the ownership discussion up to the user. However, the disjoint of the `malloc` and `free` still creates problematic situations with regards to ownership.
 
 
@@ -50,8 +37,6 @@ Using custom data types in a library is something that I am unsure how to handle
 ## using `ALuint`, `uint32_t`, or `buffer`?
 
 The buffer and source UUIDs in both openAL and openGL are of `uint32_t` type. So either the calling signature for buffers or sound sources becomes either `GLuint`, `ALuint` or I can change it to `uint32_t`. Even simpler still, we can use a typedef to have both a `buffer` or a `source` type to both be `typedef buffer uint32_t`. The problem with these types of typedefs is while they carry significance in the typename, it is not immediately obvious what exactly the type is! This is the reason I do not like typedeffing basic types. But maybe that is just me.
-
-=======
 
 ## places
 
@@ -65,8 +50,9 @@ POD objects should be structs, and do not provide constructors. They are always 
 Furthermore, the fact that a class object can clean up after itself through a destructor is also incredibly useful in preventing memory leaks.
 
 Conceptually, it IS useful to have constructors: it prevents the need for some sort of init function. However, the problem arises when multiple options of constructing an object is provided. Jon Blow solves this exact problem in his programming language Jai by only allowing one constructor to be provided. This also solves the problem of what operator new is doing (i think? not sure!).
-!!! Note
-	Jon Blow removed the constructors and destructors from the language, with the reasoning that they were not used much in the language at all. Apparently, the idea of constructors and destructors does not mesh well at all with the ownership model that data-oriented languages have in mind.
+
+!!! note
+    Addendum: Jon Blow removed the constructors and destructors from the language, with the reasoning that they were not used much in the language at all. Apparently, the idea of constructors and destructors does not mesh well at all with the ownership model that data-oriented languages have in mind.
 
 
 ## operator overloading, copy elision

@@ -1,0 +1,22 @@
+# Mallib
+
+## Conventions
+(###) Almost Always Auto, but actually Sometimes Auto
+`auto` is very useful for iterators, as it allows us to just use list iteration syntax, preventing the user from over / underflowing. However, some people strive towards the Almost Always Auto convention, as necessarily, every variable needs to be initialized. Sometimes the user does not care for the type (which is also the case for iterators).
+~~~~~~~~~~
+auto x = int{3}; // designating the type of literals
+auto car = Car{a,b,c,}; // explicit constructor invocation
+for (auto &car: cars){} // iterate by reference over every car.
+auto x = make_unique<Car>; // useful for heap allocation?
+~~~~~~~~~~
+
+The convention That I got acquainted to now is to use it in places where a constructor call is necessary. The use of auto in these cases forces us to specify a specific constructor. Furthermore, using auto for iteration allows for smarter loop unrolling by the compiler. Finally, I use auto for reference types where I don't necessarily care for the type (e.g. a reference to a map of string and a particular type).
+
+In cases where an object can be trivially constructed (i.e. `Vec3`, I use zero initialization.
+~~~~~~~~~
+Vec3 color = {}; // zero initialization.
+~~~~~~~~~
+
+
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
