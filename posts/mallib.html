@@ -8,8 +8,9 @@ This is an overview of all the conventions I (try to) adhere to in the `mallib` 
 
 As I mention in the [Ideas about Programming](ideas_about_programming.html), the compositional-style Object Oriented Programming quickly devolves in some sort of `World`-object in which all other objects live. This is then further complicated when certain types depend on the existence of some other types, or worse, certain objects have a reciprocal relation at different levels of the object hierarchy. More specifically, sometimes changes or events need to bubble upwards from the lower-level objects to higher level objects, which require lower-level objects to know of the existence of the higher-level object. However,
 this warrants the use of pointers and this eventually leads to some sort of unmanagable entangled hierarchy.
+
 !!! note
-	I want to mention that this is also due to my (in)experience. Not every OOP project has to devolve to this, but mostly the projects I worked on.
+    I want to mention that this is also due to my (in)experience. Not every OOP project has to devolve to this, but mostly the projects I worked on.
 
 I suffered from this in the initial start of the `mallib` project. It's called [ECS2](https://www.github.com/sjmdev/ECS2). The `Window` class contains a `Scene`, but also all the buffers for OpenGL to work with, but then also the `Objects` it needs to render to the screen. At a certain point, I just did not know how to properly split it up, or how to continue without endless refactoring of what I was doing. So I started over. 
 
