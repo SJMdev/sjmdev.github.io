@@ -2,24 +2,48 @@
 
 ## Conventions
 
+This is an overview of all the conventions I (try to) adhere to in the `mallib` project.
+
+(###) Keep it Super Simple, Super Stupid
+
+As I mention in the [Ideas about Programming](ideas_about_programming.html), the compositional-style Object Oriented Programming quickly devolves in some sort of `World`-object in which all other objects live. This is then further complicated when certain types depend on the existence of some other types, or worse, certain objects have a reciprocal relation at different levels of the object hierarchy. More specifically, sometimes changes or events need to bubble upwards from the lower-level objects to higher level objects, which require lower-level objects to know of the existence of the higher-level object. However,
+this warrants the use of pointers and this eventually leads to some sort of unmanagable entangled hierarchy.
+!!! note
+	I want to mention that this is also due to my (in)experience. Not every OOP project has to devolve to this, but mostly the projects I worked on.
+
+I suffered from this in the initial start of the `mallib` project. It's called [ECS2](https://www.github.com/sjmdev/ECS2). The `Window` class contains a `Scene`, but also all the buffers for OpenGL to work with, but then also the `Objects` it needs to render to the screen. At a certain point, I just did not know how to properly split it up, or how to continue without endless refactoring of what I was doing. So I started over. 
+
+During this period, I watched a lof of Jonathan Blow's livestreams on his game / his language. He uploads bite-sized chunks of his problem solving in the game development / game engine development domain. What struck me is how simple the code was that he wrote. Not that the functions are necessarily short, but more that the actual structure of the function and the function names were so indicative of what they were doing. I was inspired by the structure and simplicity of his codebase, and wanted to start over. The language his engine is written in, `Jai`, is close enough to any low-level language you can think of. However, the language is strictly procedurally oriented (i.e. there are no member functions). There is operator overloading (more specifically, definition?) allowed for certain types (Types such as `Vec3` or `Mat4x4`), where these operators can help express intent (as they are based in mathetmatics / linear algebra). Additionally, the language makes heavy use of polymorphic functions and reflection. While polymorphism and inheritance are normally tightly
+intertwined, inheritance in Jai is not possible at all. This prevents the user from shooting themselves in the foot. Polymorphism is achieved through templating (similar as in `C++`), as well as clean macro expansion (I'll talk about this another time).
+
+Long story short: the way in which that codebase was structured inspired me start over and restructure the code as as simple as possible. I am avoiding classes with member functions, and only using `POD` structs (both `std::is_trivially_constructable` and `std::is_standard_layout`). Furthermore, I am defining namespaces for certain types of `modules` (think `graphics`, `sound`, `math`). This restructuring has helped me enormously in trying to express my solution to any particular problem in the simplest way. While the application is not doing much yet, I am so much happier working on the codebase and gradually adding to it than I was before. 
+
+
+----------------------------------------
+
 (###) Almost Always Auto, but actually Sometimes Auto
 
 `auto` is very useful for iterators, as it allows us to just use list iteration syntax, preventing the user from over / underflowing. However, some people strive towards the Almost Always Auto convention, as necessarily, every variable needs to be initialized. Sometimes the user does not care for the type (which is also the case for iterators).
 ~~~~~~~~~~
 auto x = int{3}; // designating the type of literals
-auto car = Car{a,b,c,}; // explicit constructor invocation
-for (auto &car: cars){} // iterate by reference over every car.
-auto x = make_unique<Car>; // useful for heap allocation?
+auto car_name = std::string("hello"); // explicit constructor invocation
+auto cars = std::vector<Car>{a,b,c}; // list initialization with type information
+
+for (auto &car: cars){} // Iteration by reference over every car.
+auto my_car = make_unique<Car()>; // The type can be inferred by the function.
+
+// We don't really care for the type, we just want to use it.
+const auto& car_map_reference = car::complicated_stl_map_type_with_cars();
 ~~~~~~~~~~
 
-The convention That I got acquainted to now is to use it in places where a constructor call is necessary. The use of auto in these cases forces us to specify a specific constructor. Furthermore, using auto for iteration allows for smarter loop unrolling by the compiler. Finally, I use auto for reference types where I don't necessarily care for the type (e.g. a reference to a map of string and a particular type).
+The convention that I adopted is to use `auto` in places where a constructor call is necessary. The use of auto in these cases forces us to specify a specific constructor. Furthermore, using `auto` for iteration prevents a whole host of over- and underflow mistakes. In almost every case, we want to iterate over the entire array. The way it is expressed here does exactly that. We do not need a `size_t idx` and iterate by index. Finally, I use auto for reference types where I don't necessarily care for the type (e.g. a reference to a map of string and a particular type).
 
-In cases where an object can be trivially constructed (i.e. `Vec3`), I use zero initialization.
+In cases where an object can be trivially constructed (e.g. `Vec3`), I use zero initialization. This means all fields of the `POD` type are set to 0 initially, and we can still be explicit about the initialization.
 ~~~~~~~~~
 Vec3 color = {}; // zero initialization.
 ~~~~~~~~~
 
-----------------------------------------
+
 
 
 
