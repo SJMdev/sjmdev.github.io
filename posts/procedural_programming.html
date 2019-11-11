@@ -16,7 +16,7 @@ I do want to admit that Object Oriented Programming in c++ is immensely useful i
 
 ## Data oriented programming
 
-The gist of the idea is that the data is and must be a first-class citizen. Dealing with data properly will result in correct, clean and fast code. Memory management is thus one of the first concerns. In most cases, people do not even want to touch or think about memory management: it is something that the user would like the computer to deal with. The problem is that I understand this mentality very clearly: it feels like bikeshedding trying to manage your own memory, when the underlying architecture can manage memory perfectly fine. I personally am a advocate for "make it work, then make it fast", but memory layout is such a fundamental / architectural problem, that you need to think about it beforehand. I also want to mention that most of the time, for most problems, memory management is not an issue that the user even needs to think about, if the problem is simplistic enough. However, in some cases, where high performance is warranted / needed/ required, it is a very beneficial way of structuring your program. I do believe that performance is correctness, but only to a certain degree. People use c++ instead of c because some of the memory management is simplified and/or abstracted in such a way that for a minimal cost, the user gets so much more peace of mind in return. However, the patterns that yield from "performance is correctness" can still be applied in modern c++: preallocating a vector and then inserting is about 80-100% faster then just using `push_back()`. Changing the allocator to grow even greedier than exponential ( instead of size * 2, size * 3.3) also has meaningful impact on insertion speed. I personally very much enjoy the addition of the STL and its useful container types: it allows me to not worry about memory, allocation on the heap and pointers, all of which simplify my programs. However, I do understand that this all comes at a cost (not even for performance, but also for compile time!). I can't however yet bring myself to start implementing all these more efficient synonyms for these STL classes just to get 10% more performance overall. The complexity of programming grows at a large rate in that way. Maybe later.
+The gist of the idea is that the data is and must be a first-class citizen. Dealing with data properly will result in correct, clean and fast code. Memory management is thus one of the first concerns. In most cases, people do not even want to touch or think about memory management: it is something that the user would like the computer to deal with. The problem is that I understand this mentality very clearly: it feels like bikeshedding trying to manage your own memory, when the underlying architecture can manage memory perfectly fine. I personally am a advocate for "make it work, then make it fast", but memory layout is such a fundamental / architectural problem, that you need to think about it beforehand. I also want to mention that most of the time, for most problems, memory management is not an issue that the user even needs to think about, if the problem is simplistic enough. However, in some cases, where high performance is warranted / needed/ required, it is a very beneficial way of structuring your program. I do believe that performance is correctness, but only to a certain degree. People use c++ instead of c because some of the memory management is simplified and/or abstracted in such a way that for a minimal cost, the user gets so much more peace of mind in return. However, the patterns that yield from "performance is correctness" can still be applied in modern c++: preallocating a vector and then inserting is about 80-100% faster then just using `push_back()` for every individual item. Changing the allocator to grow even greedier than exponential ( instead of size * 2, size * 3.3) also has meaningful impact on insertion speed. I personally very much enjoy the addition of the STL and its useful container types: it allows me to not worry about memory, allocation on the heap and pointers, all of which simplify my programs. However, I do understand that this all comes at a cost (not even for performance, but also for compile time!). I can't however yet bring myself to start implementing all these more efficient synonyms for these STL classes just to get 10% more performance overall. The complexity of programming grows at a large rate in that way. Maybe later.
 
 ## The case for procedural programming
 
@@ -25,19 +25,19 @@ the idea of Procedural programming being usurped by OOP as the definitive better
 !!! note
     Above is only true if the class has virtual functions. Otherwise, most compilers infer no difference. 
 
- I think a solution would be to have the `dot()` function live in the namespace of `Vec3f`. I read somewhere (in a discussion of `class vs. struct`) that said __a class if it has hidden state, otherwise a struct__, which I believe to be the most sensible standpoint I have read so far. When I finished the c++ course, I had forgotten about structs. Now, I try to use them more. The quote from the discussion is similar to the idea that a struct should only contain POD (Plain Ol' Data). However, this lead me to believe that any object that requires functionality or change should be a class, which is definitely not true either.
+ I think a solution would be to have the `dot()` function live in the namespace of `Vec3f`. I read somewhere (in a discussion of `class vs. struct`) that said __a class if it has hidden state, otherwise a struct__, which I believe to be the most sensible standpoint I have read so far. By the time I finished the c++ course, I had forgotten about structs. Now, I try to use them more. The quote from the discussion is similar to the idea that a struct should only contain POD (Plain Ol' Data). However, this lead me to believe that any object that requires functionality or change should be a class, which is definitely not true either.
 
 ## Triple A c++ (Almost Always Auto)
 
 `auto` is very useful for iterators, as it allows us to just use list iteration syntax, preventing the user from over / underflowing. However, some people strive towards the Almost Always Auto convention, as necessarily, every variable needs to be initialized. Sometimes the user does not care for the type (which is also the case for iterators).
 ~~~~~~~~~~
-auto x = int{3};
-auto car = Car{a,b,c,};
-for (auto &car: cars){}
+auto x = int{3}; // designating the type of literals
+auto car = Car{a,b,c,}; // explicit constructor invocation
+for (auto &car: cars){} // iterate by reference over every car.
 auto x = make_unique<Car>; // useful for heap allocation?
 ~~~~~~~~~~
 
-The convention That I got acquainted to now is to use it in places where a constructor call is necessary. The use of auto in these cases forces us to specit a specific constructor. Furthermore, using auto for iteration allows for smarter loop unrolling by the compiler. Finally, I use auto for reference types where I don't necessarily care for the type (e.g. a reference to a map of string and a particular type).
+The convention That I got acquainted to now is to use it in places where a constructor call is necessary. The use of auto in these cases forces us to specify a specific constructor. Furthermore, using auto for iteration allows for smarter loop unrolling by the compiler. Finally, I use auto for reference types where I don't necessarily care for the type (e.g. a reference to a map of string and a particular type).
 
 In cases where an object can be trivially constructed, I use zero initialization.
 
@@ -51,7 +51,7 @@ Using custom data types in a library is something that I am unsure how to handle
 
 ## using `ALuint`, `uint32_t`, or `buffer`?
 
-the buffer and source UUIDs in both openAL and openGL are of `uint32_t` type. So either the calling signature for buffers or sound sources becomes either `GLuint`, `ALuint` or I can change it to `uint32_t`. Even simpler still, we can use a typedef to have both a `buffer` or a `source` type to both be `typedef buffer uint32_t`. The problem with these types of typedefs is while they carry significance in the typename, it is not immediately obvious what exactly the type is! This is the reason I do not like typedeffing basic types. But maybe that is just me.
+The buffer and source UUIDs in both openAL and openGL are of `uint32_t` type. So either the calling signature for buffers or sound sources becomes either `GLuint`, `ALuint` or I can change it to `uint32_t`. Even simpler still, we can use a typedef to have both a `buffer` or a `source` type to both be `typedef buffer uint32_t`. The problem with these types of typedefs is while they carry significance in the typename, it is not immediately obvious what exactly the type is! This is the reason I do not like typedeffing basic types. But maybe that is just me.
 
 =======
 
@@ -64,12 +64,15 @@ places of storages, places of generation, places of transformation, places of lo
 
 POD objects should be structs, and do not provide constructors. They are always in a valid state through default initializers. Any object that allocates memory for itself (or even for something else) should be a class, as you do not want to use them in an invalid state. There is no way to guarantee that a user will always call some sort of `init()` function on struct. That means that the author needs to be wary of any functions that he or she provides, as the onus is now on every function to verify whether the object is valid or not. Furthermore, POD objects both have a standard layout. Trivial objects are contained in a contiguous memory area, but the order of the fields is not determined.
 
-furthermore, the fact that a class object can clean up after itself through a destructor is also incredibly useful in preventing memory leaks.
+Furthermore, the fact that a class object can clean up after itself through a destructor is also incredibly useful in preventing memory leaks.
 
-Conceptually, it IS useful to have constructors: it prevents the need for some sort of init function. However, the problem arises when multiple options of constructing an object is provided. Jon Blow solves this exact problem by only allowing one constructor to be provided. This also solves the problem of what operator new is doing (i think? not sure!).
+Conceptually, it IS useful to have constructors: it prevents the need for some sort of init function. However, the problem arises when multiple options of constructing an object is provided. Jon Blow solves this exact problem in his programming language Jai by only allowing one constructor to be provided. This also solves the problem of what operator new is doing (i think? not sure!).
+!!! Note
+	Jon Blow removed the constructors and destructors from the language, with the reasoning that they were not used much in the language at all. Apparently, the idea of constructors and destructors does not mesh well at all with the ownership model that data-oriented languages have in mind.
+
 
 ## operator overloading, copy elision
-`c` does not allow for operator overloading. It is a very useful feature, especially in numerical maths. However, it is difficult to convey what each operator actually does for non-value types.
+`c` does not allow for operator overloading. It is a very useful feature, especially in numerical maths. However, it is difficult to convey what each operator actually does for non-value types. Additionally, the use of operators can facilitate the use of polymorphic functions without inheritance (as it is only required to define the relevant operators of the type supplied to the function).
 
 
 <!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
