@@ -10,7 +10,7 @@ As I mention in the [Ideas about Programming](ideas_about_programming.html), the
 this warrants the use of pointers and this eventually leads to some sort of unmanagable entangled hierarchy.
 
 !!! note
-    I want to mention that this is also due to my (in)experience. Not every OOP project has to devolve to this, but mostly the projects I worked on.
+    Not every OOP project has to devolve to unmanagable entangled hierarchy problems, but most of the projects I ever worked on suffer from this exact problem.
 
 I suffered from this in the initial start of the `mallib` project. It's called [ECS2](https://www.github.com/sjmdev/ECS2). The `Window` class contains a `Scene`, but also all the buffers for OpenGL to work with, but then also the `Objects` it needs to render to the screen. At a certain point, I just did not know how to properly split it up, or how to continue without endless refactoring of what I was doing. So I started over. 
 
@@ -43,6 +43,69 @@ In cases where an object can be trivially constructed (e.g. `Vec3`), I use zero 
 ~~~~~~~~~
 Vec3 color = {}; // zero initialization.
 ~~~~~~~~~
+
+
+----------------------------------------
+
+(###) Static Singletons for Simple Sharing
+
+In the early stages of the project, I needed (still do) access to data on the heap. A recurring problem I keep running into is that I have difficulty knowing what goes where. More specifically, I have trouble pinpointing whose responsibility it is to create and clean up certain objects, especially objects that are shared between multiple classes / namespaces. As decribed in the [Thesis section](thesis.html), I thought about using the `extern` pattern. The problem with that is that it still needs to live somewhere. A way to remediate this for now is by the use of `static` singletons. Let's imagine that we have some sort of asset loading / management loading facility. For simplicity's sake, This is defined as the following:
+
+~~~~~~~~~~
+// namespace.h
+namespace asset
+{
+	// content goes here.
+}
+~~~~~~~~~~
+Imagine that this `asset` has some functionality to load all `obj` (model) files from a certain folder. For simplicity's sake, these Model files are stored in a `std::map&lt;std::string, Model&gt;` object.  In this example , `Model` is just some object that contains all the data originally in the  It would thus offer functionality similar to 
+
+~~~~~~~~~~
+// namespace.h
+namespace asset
+{
+	// ignore the return type here, just an example!
+	void load_models_from_folder(std::map&lt;std::string, Model&gt;& models, const std::string& folder_name);
+}
+~~~~~~~~~~
+The specific problem given this example is: Where does the `std::map&lt;std::string, Model&gt; models` live? Who created it? Who is responsible for deleting it? (While not really necessary in the case of a game engine, but it is still a valid question).
+
+I firmly believe that the more I work on the engine, the more clear and concise the problem statement becomes. Therefore, I opted to use the following pattern:
+
+~~~~~~~~~~
+// namespace.h
+namespace asset
+{
+	// ignore the return type here, just an example!
+	void load_Models_from_folder(std::map&lt;std::string, Model&gt;& models, const std::string& folder_name);
+
+	std::map&lt;std::string, Model&gt;& models();
+}
+
+// namespace.cc
+std::map<std::string, Model>& asset::models()
+{
+	static std::map&lt;std::string, Model&gt; models;
+	return models;
+}
+~~~~~~~~~~
+This means that the namespace can provide a reference to this `static` model map. I believe that since c++17, these are guaranteed to be initialized before anything else (or at least, before we can return a reference). 
+I need to do some more research, but I believe accessing these is threadsafe (however, that of course comes at a cost). For now, it is the simplest solution to a problem I don't know yet how to solve once and for all.
+
+----------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
