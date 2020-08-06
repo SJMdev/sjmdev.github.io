@@ -1,0 +1,65 @@
+# Master Thesis
+
+
+## the singleton class pattern
+Since the design of the application is not rigid, and I needed to be able to modify everything on-the-fly, I chose to use two simple approaches for data. The first of these is the  `static singleton` pattern. In the target header, the singleton is declared as
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C
+	Singleton& singleton_reference();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+then, in some source file `*.cc`, the singleton is further defined as
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C
+	Singleton& singleton_reference()
+	{
+		static Singleton singleton;
+
+		return singleton;
+	}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This returns a reference to the static singleton.  This static singleton is thread-safe. 
+
+While this is a very useful technique, it is not a silver bullet (or golden hammer, if you fancy). This is noted in the book [Game Engine Architecture](https://www.gameenginebook.com). Suppose there exists a set of subsystems that need to be initialized in a certain order (either through an implicit dependency or simply more control). There is no explicit control over _when_ exactly these subsystems are constructed, as they are constructed when they are first called. This can be unwanted behavior. However, for my purposes, they are fine.
+
+This singleton pattern tightly matches another, which is the `settings struct` pattern. I don't know exactly who came up with it, but I saw Sean barret (of `stb` header fame) talking about using it. The gist of it is that all settings of the application are jumbled together in a giant `state` or `settings` struct. This is of course infeasible for very large applications, but for quick prototyping, it is easy to pile new things into the settings class.
+
+Both of these features allowed me to rapidly prototype certain aspects of the application. Most notably, the UI integration.
+
+## UI integration : Dear IMGUI
+[Dear IMGUI](https://github.com/ocornut/imgui) is one of the most useful external pieces of code I have ever used. I usually do not bother with third party libraries other than the `STL` for my own applications (or maybe [GLFW](https://www.glfw.org/)), but for UI purposes, I don't think there is anything better for quick prototyping. I have used Qt in the past, and while I think it is adequate, I don't like the MOC and the overarching complexity of it. Furthermore, since Qt is relatively old, they have their own variants of `STL` types (e.g. `QVector, QString`) which can be annoying to work with.
+
+I don't have much to say about it, expect for the fact that I like the declarative nature of creating a UI.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C
+ImgGui::Begin()
+
+if (ImGui::Button("render "))
+{
+    render_with_stencil =  1 - render_with_stencil;
+}
+
+if (ImGui::SliderFloat("Scale", &settings.model_scale, model_min_scale, model_max_scale))
+{
+	// we can even react here too if we'd like!
+}
+
+ImGui::End();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ It allows us to react to certain events directly, by evaluating the condition, such as in `Button`, but also just hand over control to the UI directlym such as in `SliderFloat`. Overall, a very neat, useful library.
+
+
+## File Watcher and Hot reloading
+One thing I did not implement but would have wanted is both hot code reloading and a file watcher. If the shader changes, I would want the application to just reload the shader. In the current case, the application needs to be shut down and restarted. This hinders the workflow, although since shaders compile relatively fast at startup, 
+the time cost is not that bad. However, the same could be done with the `c++` codebase, by reloading the application DLL. However, this requires an architecture change which I could not afford to spend time on in the later phases of my thesis.
+
+## The gist of Geometry Shader
+
+
+
+
+
+
+
+
+
+<!-- Markdeep: --><style class="fallback">body{visibility:hidden;white-space:pre;font-family:monospace}</style><script src="markdeep.min.js"></script><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js"></script><script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
