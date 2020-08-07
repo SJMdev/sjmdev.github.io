@@ -21,7 +21,7 @@ This returns a reference to the static singleton.  This static singleton is thre
 
 While this is a very useful technique, it is not a silver bullet (or golden hammer, if you fancy). This is noted in the book [Game Engine Architecture](https://www.gameenginebook.com). Suppose there exists a set of subsystems that need to be initialized in a certain order (either through an implicit dependency or simply more control). There is no explicit control over _when_ exactly these subsystems are constructed, as they are constructed when they are first called. This can be unwanted behavior. However, for my purposes, they are fine.
 
-This singleton pattern tightly matches another, which is the `settings struct` pattern. I don't know exactly who came up with it, but I saw Sean barret (of `stb` header fame) talking about using it. The gist of it is that all settings of the application are jumbled together in a giant `state` or `settings` struct. This is of course infeasible for very large applications, but for quick prototyping, it is easy to pile new things into the settings class.
+This singleton pattern tightly matches another, which is the `settings struct` pattern. I don't know exactly who came up with it, but I saw Sean Barret (of `stb` header fame) talking about using it. The gist of it is that all settings of the application are jumbled together in a giant `state` or `settings` struct. This is of course infeasible for very large applications, but for quick prototyping, it is easy to pile new things into the settings class.
 
 Both of these features allowed me to rapidly prototype certain aspects of the application. Most notably, the UI integration.
 
@@ -52,8 +52,8 @@ ImGui::End();
 One thing I did not implement but would have wanted is both hot code reloading and a file watcher. If the shader changes, I would want the application to just reload the shader. In the current case, the application needs to be shut down and restarted. This hinders the workflow, although since shaders compile relatively fast at startup, 
 the time cost is not that bad. However, the same could be done with the `c++` codebase, by reloading the application DLL. However, this requires an architecture change which I could not afford to spend time on in the later phases of my thesis.
 
-## The gist of Geometry Shader
-
+## The gist of the Geometry Shader
+While I can't elaborate too much on what I wrote for my thesis, generally..
 
 
 
